@@ -6,6 +6,8 @@ The collection of documents is written in markdown and organised for use with `m
 
 :warning: **WARNING**:  System Administration is the noble art of making computers work. And System Administrators have the responsibility when things don't work (which may be more often than we care to admit). While the recipes have all been tested as advertised, your mileage may vary when applying them. Make sure you know what you are doing when following any recipe as executing root-level commands may lead to catastrophic failure for your systems.
 
+[Read the recipes](https://epicureandigitalengineer.github.io/SysAdminRecipes/)
+
 ## Project layout
 
     mkdocs.yml    	            # The configuration file.
