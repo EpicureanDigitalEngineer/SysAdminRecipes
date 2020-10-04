@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/secure-server/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/jails/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/ghost/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url><url>
+     <loc>https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/notyet/</loc>
+     <lastmod>2020-10-04</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+</urlset>

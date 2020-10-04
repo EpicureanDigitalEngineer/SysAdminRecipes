@@ -1,0 +1,1321 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A collection of recipes (articles, guides, HowTos, instructables) around system administration and digital services">
+      
+      
+        <link rel="canonical" href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/secure-server/">
+      
+      
+        <meta name="author" content="The Epicurean Digital Engineer (EpicureanDigitalEngineer@gmail.com)">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.13">
+    
+    
+      
+        <title>A Secure FreeBSD Server in the cloud - System Administration Recipes</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.077507d7.min.css">
+      
+      
+    
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installing-a-secure-freebsd-12-server-on-a-dedicated-cloud-machine" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes" title="System Administration Recipes" class="md-header-nav__button md-logo" aria-label="System Administration Recipes">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            System Administration Recipes
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              A Secure FreeBSD Server in the cloud
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+        
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes" title="System Administration Recipes" class="md-nav__button md-logo" aria-label="System Administration Recipes">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    System Administration Recipes
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="SysAdmin Recipes" class="md-nav__link">
+      SysAdmin Recipes
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
+    <label class="md-nav__link" for="nav-2">
+      FreeBSD Recipes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="FreeBSD Recipes" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        FreeBSD Recipes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../" title="About FreeBSD Recipes" class="md-nav__link">
+      About FreeBSD Recipes
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        A Secure FreeBSD Server in the cloud
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" title="A Secure FreeBSD Server in the cloud" class="md-nav__link md-nav__link--active">
+      A Secure FreeBSD Server in the cloud
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ingredients" class="md-nav__link">
+    Ingredients
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspect-your-system" class="md-nav__link">
+    Inspect your System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#partition-the-disks" class="md-nav__link">
+    Partition the disks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-the-mirrors-for-swap-and-boot" class="md-nav__link">
+    Prepare the mirrors for swap and boot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-stage-1-boot-system-non-encrypted" class="md-nav__link">
+    Install the stage-1 boot system (non-encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the stage-1 boot system (non-encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prepare-the-filesystem" class="md-nav__link">
+    Prepare the filesystem
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-freebsd-system" class="md-nav__link">
+    Install the FreeBSD system
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-configuration" class="md-nav__link">
+    Boot configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-os-configuration" class="md-nav__link">
+    Basic OS Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic OS Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change-the-root-password" class="md-nav__link">
+    Change the root password
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setup-timezone" class="md-nav__link">
+    Setup timezone
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sshd-configuration" class="md-nav__link">
+    SSHd configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reboot-and-continue-configuration" class="md-nav__link">
+    Reboot and continue configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-freebsd" class="md-nav__link">
+    Update FreeBSD
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-stage-2-freebsd-system-encrypted" class="md-nav__link">
+    Install the stage-2 FreeBSD system (encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the stage-2 FreeBSD system (encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attach-encrypted-partitions" class="md-nav__link">
+    Attach encrypted partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-zfs-pool" class="md-nav__link">
+    Create the zfs pool
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-freebsd-system_1" class="md-nav__link">
+    Install the FreeBSD system
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-the-stage-2-system" class="md-nav__link">
+    Configure the stage-2 system
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure the stage-2 system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-settings" class="md-nav__link">
+    Basic settings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-a-script-automatically-decrypt-and-boot-to-stage-2" class="md-nav__link">
+    Prepare a script automatically decrypt and boot to stage 2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-system-to-stage-2" class="md-nav__link">
+    Boot the system to Stage-2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-freebsd" class="md-nav__link">
+    Upgrade FreeBSD
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-configuration-of-your-stage-2-freebsd-server" class="md-nav__link">
+    Post configuration of your Stage-2 FreeBSD server
+  </a>
+  
+    <nav class="md-nav" aria-label="Post configuration of your Stage-2 FreeBSD server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-the-pkg-system-and-basic-packages" class="md-nav__link">
+    Install the pkg system and basic packages
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-of-your-secure-server" class="md-nav__link">
+    Maintenance of your secure server
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../jails/" title="A Jail-based FreeBSD Application Server" class="md-nav__link">
+      A Jail-based FreeBSD Application Server
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../ghost/" title="Installing the ghost blogging platform in FreeBSD" class="md-nav__link">
+      Installing the ghost blogging platform in FreeBSD
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../notyet/" title="A Windows Domain Controller using SAMBA on FreeBSD" class="md-nav__link">
+      A Windows Domain Controller using SAMBA on FreeBSD
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#ingredients" class="md-nav__link">
+    Ingredients
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#inspect-your-system" class="md-nav__link">
+    Inspect your System
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#steps" class="md-nav__link">
+    Steps
+  </a>
+  
+    <nav class="md-nav" aria-label="Steps">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#partition-the-disks" class="md-nav__link">
+    Partition the disks
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-the-mirrors-for-swap-and-boot" class="md-nav__link">
+    Prepare the mirrors for swap and boot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-stage-1-boot-system-non-encrypted" class="md-nav__link">
+    Install the stage-1 boot system (non-encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the stage-1 boot system (non-encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#prepare-the-filesystem" class="md-nav__link">
+    Prepare the filesystem
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-freebsd-system" class="md-nav__link">
+    Install the FreeBSD system
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-configuration" class="md-nav__link">
+    Boot configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-os-configuration" class="md-nav__link">
+    Basic OS Configuration
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic OS Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#change-the-root-password" class="md-nav__link">
+    Change the root password
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#setup-timezone" class="md-nav__link">
+    Setup timezone
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#sshd-configuration" class="md-nav__link">
+    SSHd configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reboot-and-continue-configuration" class="md-nav__link">
+    Reboot and continue configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-freebsd" class="md-nav__link">
+    Update FreeBSD
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-stage-2-freebsd-system-encrypted" class="md-nav__link">
+    Install the stage-2 FreeBSD system (encrypted)
+  </a>
+  
+    <nav class="md-nav" aria-label="Install the stage-2 FreeBSD system (encrypted)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#attach-encrypted-partitions" class="md-nav__link">
+    Attach encrypted partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-zfs-pool" class="md-nav__link">
+    Create the zfs pool
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-the-freebsd-system_1" class="md-nav__link">
+    Install the FreeBSD system
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-the-stage-2-system" class="md-nav__link">
+    Configure the stage-2 system
+  </a>
+  
+    <nav class="md-nav" aria-label="Configure the stage-2 system">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-settings" class="md-nav__link">
+    Basic settings
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#prepare-a-script-automatically-decrypt-and-boot-to-stage-2" class="md-nav__link">
+    Prepare a script automatically decrypt and boot to stage 2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boot-the-system-to-stage-2" class="md-nav__link">
+    Boot the system to Stage-2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#upgrade-freebsd" class="md-nav__link">
+    Upgrade FreeBSD
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#post-configuration-of-your-stage-2-freebsd-server" class="md-nav__link">
+    Post configuration of your Stage-2 FreeBSD server
+  </a>
+  
+    <nav class="md-nav" aria-label="Post configuration of your Stage-2 FreeBSD server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#install-the-pkg-system-and-basic-packages" class="md-nav__link">
+    Install the pkg system and basic packages
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-of-your-secure-server" class="md-nav__link">
+    Maintenance of your secure server
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/edit/master/docs/freebsd/secure-server.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  
+                
+                
+                <h1 id="installing-a-secure-freebsd-12-server-on-a-dedicated-cloud-machine">Installing a secure FreeBSD 12 server on a dedicated cloud machine<a class="headerlink" href="#installing-a-secure-freebsd-12-server-on-a-dedicated-cloud-machine" title="Permanent link">&para;</a></h1>
+<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
+<p>This recipe describes how to install a secure FreeBSD Server on a bare-metal server to which you have but network access (no access to the console during installation and/or during boot). It is further assumed that the physical security of the machine cannot be fully guaranteed, hence encryption methods should be used to protect the server's data. </p>
+<p>While the FreeBSD installer offers the possibility to automagically install an encrypted system, it is based on the assumption that you will have console access during boot to introduce the passkey - something not always possible. The proposed setup ensures a kernel-level software RAID-1 configuration (for data integrity/availability), operating on an encrypted filesystem using <code class="codehilite"><span class="err">ZFS</span></code> (for data confidentiality) and with an encrypted swap partition. </p>
+<h2 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h2>
+<p>The solution proposed by this recipe is based on the pattern of a <strong>two-stage booting process</strong>: a first boot in a basic (<code class="codehilite"><span class="err">ufs</span></code>) unencrypted partition which allows network <code class="codehilite"><span class="err">ssh</span></code> access (via key), followed by attaching the <code class="codehilite"><span class="err">geli</span></code>-encrypted filesystem (by introducing a password at command line) and the re-rooting of the running kernel to the encrypted filesystem, effectively re-booting the kernel from the new filesystem which is at this stage available un-encrypted to the kernel.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Re-rooting refers to the use of the <code class="codehilite"><span class="err">reboot -r</span></code> command  (see <a href="https://www.freebsd.org/cgi/man.cgi?reboot(8)">man page</a>): <em>After changing</em> <code class="codehilite"><span class="err">vfs.root.mountfrom</span></code> <em>with</em> <code class="codehilite"><span class="err">kenv(1)</span></code>, <code class="codehilite"><span class="err">reboot -r</span></code> <em>can be used to change the root filesystem while preserving kernel state</em>.</p>
+</div>
+<p>The pattern can be further enhanced by hardening the first boot stage to only execute the mount sequence through <code class="codehilite"><span class="err">ssh</span></code>. Such hardening will increase security but will make rescue operations (that may have to be operated under stage 1 boot) harder. It is therefore not considered in this document.</p>
+<p><img alt="server-architecture" src="../../img/server-architecture.jpg" /></p>
+<h2 id="ingredients">Ingredients<a class="headerlink" href="#ingredients" title="Permanent link">&para;</a></h2>
+<p>To be able to execute this recipe, you will need a dedicated machine to which you have network access. The machine should have two equal-sized disks and enough memory to serve the corresponding disk capacity under <code class="codehilite"><span class="err">zfs</span></code>. The installation can be done either remotely (if the machine can network-boot on a FreeBSD copy) or through the console (if you have access to the console). How to boot to FreeBSD from the console is not covered in this document.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The recipe has been tested on a dedicated server provided by <a href="Hetzner">https://www.hetzner.com/</a> as well on <code class="codehilite"><span class="err">VirtualBox</span></code>. The machine enjoyed 2X2TB hard disks, 32GB of ECC memory and an Intel Xeon processor. Hetzner offers a "rescue" system, network-booting to FreeBSD and assigning a temporary password.</p>
+</div>
+<p>The recipe therefore starts from a booted version of FreeBSD on your server that can be accessed from your network.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This installation guide is not for the faint hearted (but you already knew that if you are here). You need to really understand what you are doing to avoid catastrophic failure. You should be comfortable with FreeBSD sysadmin tasks and a patient and zen attitude. Expect the unexpected when installing an OS in a new environment (e.g. if you do install in Hetzner pay specific attention to configuring the network which requires a point-to-point configuration).</p>
+</div>
+<h2 id="inspect-your-system">Inspect your System<a class="headerlink" href="#inspect-your-system" title="Permanent link">&para;</a></h2>
+<p>Log-in to your network-booted FreeBSD image as root. Obtain initial information about your server's hardware .</p>
+<p><strong>Processor</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ sysctl -a hw.model
+hw.model: Intel<span class="o">(</span>R<span class="o">)</span> Xeon<span class="o">(</span>R<span class="o">)</span> CPU E3-1246 v3 @ <span class="m">3</span>.50GHz
+</code></pre></div>
+
+<p><strong>Memory</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ sysctl -a <span class="p">|</span> grep hw.*mem
+hw.physmem: <span class="m">33950691328</span>
+hw.usermem: <span class="m">33666101248</span>
+hw.realmem: <span class="m">34359738368</span>
+hw.pci.host_mem_start: <span class="m">2147483648</span>
+hw.cbb.start_memory: <span class="m">2281701376</span>
+</code></pre></div>
+
+<p><strong>Network</strong>:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ ifconfig -a
+re0: <span class="nv">flags</span><span class="o">=</span><span class="m">8843</span>&lt;UP,BROADCAST,RUNNING,SIMPLEX,MULTICAST&gt; metric <span class="m">0</span> mtu <span class="m">1500</span>
+        <span class="nv">options</span><span class="o">=</span>8209b&lt;RXCSUM,TXCSUM,VLAN_MTU,VLAN_HWTAGGING,VLAN_HWCSUM,WOL_MAGIC,LINKSTATE&gt;
+        ether <span class="m">44</span>:44:44:44:44:44
+        inet <span class="m">9</span>.9.9.9 netmask 0xffffffc0 broadcast <span class="m">9</span>.9.9.127
+        media: Ethernet autoselect <span class="o">(</span>1000baseT &lt;full-duplex,master&gt;<span class="o">)</span>
+        status: active
+        nd6 <span class="nv">options</span><span class="o">=</span><span class="m">29</span>&lt;PERFORMNUD,IFDISABLED,AUTO_LINKLOCAL&gt;
+</code></pre></div>
+
+<p><strong>Disks</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ sysctl kern.disks
+kern.disks: ada1 ada0
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ camcontrol devlist
+&lt;WDC WD2000FYYZ-01UL1B2 <span class="m">01</span>.01K03&gt;  at scbus0 target <span class="m">0</span> lun <span class="m">0</span> <span class="o">(</span>pass0,ada0<span class="o">)</span>
+&lt;WDC WD2000FYYZ-01UL1B2 <span class="m">01</span>.01K03&gt;  at scbus1 target <span class="m">0</span> lun <span class="m">0</span> <span class="o">(</span>pass1,ada1<span class="o">)</span>
+&lt;AHCI SGPIO Enclosure <span class="m">1</span>.00 <span class="m">0001</span>&gt;   at scbus2 target <span class="m">0</span> lun <span class="m">0</span> <span class="o">(</span>ses0,pass2<span class="o">)</span>
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ diskinfo -v ada0 <span class="p">|</span> head -n3
+ada0
+        <span class="m">512</span>             <span class="c1"># sectorsize</span>
+        <span class="m">2000398934016</span>   <span class="c1"># mediasize in bytes (1.8T)</span>
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ camcontrol identify ada0 <span class="p">|</span> grep sector
+sectors/track         <span class="m">63</span>
+sector size           logical <span class="m">512</span>, physical <span class="m">512</span>, offset <span class="m">0</span>
+LBA supported         <span class="m">268435455</span> sectors
+LBA48 supported       <span class="m">3907029168</span> sectors
+</code></pre></div>
+
+<div class="admonition note">
+<p class="admonition-title">Physical sector sizes</p>
+<p>Take note of your physical sector size: It is important to take note of the size of your physical sector (here 512 bytes) to ensure correct alignment when creating the ZFS partitions.</p>
+</div>
+<p>Example of 4K physical disk sectors:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ camcontrol identify ada0 <span class="p">|</span> grep sector
+sectors/track         <span class="m">63</span>
+sector size           logical <span class="m">512</span>, physical <span class="m">4096</span>, offset <span class="m">0</span>
+LBA supported         <span class="m">268435455</span> sectors
+LBA48 supported       <span class="m">7814037168</span> sectors
+</code></pre></div>
+
+<h2 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h2>
+<h3 id="partition-the-disks">Partition the disks<a class="headerlink" href="#partition-the-disks" title="Permanent link">&para;</a></h3>
+<p>Following inspection of our system, we have recorded that the two disks  are <code class="codehilite"><span class="err">ada0</span></code> and <code class="codehilite"><span class="err">ada1</span></code> with 512byte physical sectors.</p>
+<p>We partition each disks in 4 partitions each, using GPT:</p>
+<ol>
+<li>a (very small) boot partition (for the ufs-bootcode)</li>
+<li>a 2GB ufs FreeBSD-root partition to be mirrored (for the pre-boot FreeBSD version)</li>
+<li>an 8GB swap partition (to be encrypted and mirrored)<ol>
+<li>what remains goes in a FreeBSD-zfs partition (to be encrypted using <code class="codehilite"><span class="err">geli</span></code> and <code class="codehilite"><span class="err">gmirror</span></code> or <code class="codehilite"><span class="err">zfs mirror</span></code>)</li>
+</ol>
+</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="k">for</span> n in <span class="m">0</span> <span class="m">1</span><span class="p">;</span> <span class="k">do</span> <span class="se">\</span>
+ <span class="nv">align</span><span class="o">=</span><span class="m">512</span> <span class="c1"># change to 4k if necessary</span>
+ gpart destroy -F ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart create -s gpt ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart add -b <span class="m">64</span> -s 64k   -t freebsd-boot ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart add -l boot<span class="si">${</span><span class="nv">n</span><span class="si">}</span> -s 2G -t freebsd-ufs  -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart add -l swap<span class="si">${</span><span class="nv">n</span><span class="si">}</span> -s 8G -t freebsd-swap -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart add -l zroot<span class="si">${</span><span class="nv">n</span><span class="si">}</span>      -t freebsd-zfs  -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+ gpart bootcode -b /boot/pmbr -p /boot/gptboot -i <span class="m">1</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+<span class="k">done</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ <span class="k">for</span> n in <span class="m">0</span> <span class="m">1</span><span class="p">;</span> <span class="k">do</span> <span class="se">\</span>
+&gt;  <span class="nv">align</span><span class="o">=</span><span class="m">512</span> <span class="c1"># change to 4k if necessary</span>
+&gt;  gpart destroy -F ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart create -s gpt ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart add -b <span class="m">64</span> -s 64k   -t freebsd-boot ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart add -l boot<span class="si">${</span><span class="nv">n</span><span class="si">}</span> -s 2G -t freebsd-ufs  -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart add -l swap<span class="si">${</span><span class="nv">n</span><span class="si">}</span> -s 8G -t freebsd-swap -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart add -l zroot<span class="si">${</span><span class="nv">n</span><span class="si">}</span>      -t freebsd-zfs  -a <span class="si">${</span><span class="nv">align</span><span class="si">}</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt;  gpart bootcode -b /boot/pmbr -p /boot/gptboot -i <span class="m">1</span> ada<span class="si">${</span><span class="nv">n</span><span class="si">}</span> <span class="p">;</span><span class="se">\</span>
+&gt; <span class="k">done</span>
+gpart: arg0 <span class="s1">&#39;ada0&#39;</span>: Invalid argument
+ada0 created
+ada0p1 added
+ada0p2 added
+ada0p3 added
+ada0p4 added
+partcode written to ada0p1
+bootcode written to ada0
+gpart: arg0 <span class="s1">&#39;ada1&#39;</span>: Invalid argument
+ada1 created
+ada1p1 added
+ada1p2 added
+ada1p3 added
+ada1p4 added
+partcode written to ada1p1
+bootcode written to ada1
+</code></pre></div>
+
+<p>Note that the errors noticed above can be safely ignored. They simply indicate that no partition table existed before to be deleted.</p>
+<h3 id="prepare-the-mirrors-for-swap-and-boot">Prepare the mirrors for swap and boot<a class="headerlink" href="#prepare-the-mirrors-for-swap-and-boot" title="Permanent link">&para;</a></h3>
+<p>Mirroring for the <code class="codehilite"><span class="err">ufs</span></code> and <code class="codehilite"><span class="err">swap</span></code> partitions will happen using the  <code class="codehilite"><span class="err">geom_mirror</span></code> kernel module. Encryption will be done using the <code class="codehilite"><span class="err">geli</span></code> system. We encrypt the swap partition dynamically while we encrypt the zfs partition with a strong password. The ZFS filesystem will perform its own mirroring.  Do not forget to adapt the sector size for <code class="codehilite"><span class="err">geli</span></code> if necessary (e.g. 4096 instead of 512)!</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ kldload geom_mirror
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ gmirror label -b load -F swap /dev/gpt/swap0 /dev/gpt/swap1
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ gmirror label -b load -F boot /dev/gpt/boot0 /dev/gpt/boot1
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ geli onetime -d -e AES-XTS -l <span class="m">256</span> -s <span class="m">4096</span> /dev/mirror/swap
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> __Your Password Here__ &gt; /tmp/pw
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ geli init -s <span class="m">512</span> -J /tmp/pw /dev/gpt/zroot0
+Metadata backup <span class="k">for</span> provider /dev/gpt/zroot0 can be found in /var/backups/gpt_zroot0.eli
+and can be restored with the following command:
+        <span class="c1"># geli restore /var/backups/gpt_zroot0.eli /dev/gpt/zroot0</span>
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ geli init -s <span class="m">512</span> -J /tmp/pw /dev/gpt/zroot1
+Metadata backup <span class="k">for</span> provider /dev/gpt/zroot1 can be found in /var/backups/gpt_zroot1.eli
+and can be restored with the following command:
+        <span class="c1"># geli restore /var/backups/gpt_zroot1.eli /dev/gpt/zroot1</span>
+</code></pre></div>
+
+<h3 id="install-the-stage-1-boot-system-non-encrypted">Install the stage-1 boot system (non-encrypted)<a class="headerlink" href="#install-the-stage-1-boot-system-non-encrypted" title="Permanent link">&para;</a></h3>
+<p>This is the (mirrored) non-encrypted system that is used to boot into and ssh to in order to allow attaching the encrypted zroot pool of ZFS before rebooting into the ZFS partition.</p>
+<h4 id="prepare-the-filesystem">Prepare the filesystem<a class="headerlink" href="#prepare-the-filesystem" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ newfs -U /dev/mirror/boot
+/dev/mirror/boot: <span class="m">2048</span>.0MB <span class="o">(</span><span class="m">4194296</span> sectors<span class="o">)</span> block size <span class="m">32768</span>, fragment size <span class="m">4096</span>
+        using <span class="m">4</span> cylinder groups of <span class="m">512</span>.00MB, <span class="m">16384</span> blks, <span class="m">65536</span> inodes.
+        with soft updates
+super-block backups <span class="o">(</span><span class="k">for</span> fsck_ffs -b <span class="c1">#) at:</span>
+ <span class="m">192</span>, <span class="m">1048768</span>, <span class="m">2097344</span>, <span class="m">3145920</span>
+<span class="o">[</span>root@rescue ~<span class="o">]</span>$ tunefs -p /dev/mirror/boot
+tunefs: POSIX.1e ACLs: <span class="o">(</span>-a<span class="o">)</span>                                disabled
+tunefs: NFSv4 ACLs: <span class="o">(</span>-N<span class="o">)</span>                                   disabled
+tunefs: MAC multilabel: <span class="o">(</span>-l<span class="o">)</span>                               disabled
+tunefs: soft updates: <span class="o">(</span>-n<span class="o">)</span>                                 enabled
+tunefs: soft update journaling: <span class="o">(</span>-j<span class="o">)</span>                       disabled
+tunefs: gjournal: <span class="o">(</span>-J<span class="o">)</span>                                     disabled
+tunefs: trim: <span class="o">(</span>-t<span class="o">)</span>                                         disabled
+tunefs: maximum blocks per file in a cylinder group: <span class="o">(</span>-e<span class="o">)</span>  <span class="m">4096</span>
+tunefs: average file size: <span class="o">(</span>-f<span class="o">)</span>                            <span class="m">16384</span>
+tunefs: average number of files in a directory: <span class="o">(</span>-s<span class="o">)</span>       <span class="m">64</span>
+tunefs: minimum percentage of free space: <span class="o">(</span>-m<span class="o">)</span>             <span class="m">8</span>%
+tunefs: space to hold <span class="k">for</span> metadata blocks: <span class="o">(</span>-k<span class="o">)</span>            <span class="m">5240</span>
+tunefs: optimization preference: <span class="o">(</span>-o<span class="o">)</span>                      <span class="nb">time</span>
+tunefs: volume label: <span class="o">(</span>-L<span class="o">)</span>
+</code></pre></div>
+
+<p>Check that soft update journaling is disabled! This will allow you to take live dumps. </p>
+<h4 id="install-the-freebsd-system">Install the FreeBSD system<a class="headerlink" href="#install-the-freebsd-system" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ mount /dev/mirror/boot /mnt
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/base.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/lib32.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/kernel.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+</code></pre></div>
+
+<h4 id="boot-configuration">Boot configuration<a class="headerlink" href="#boot-configuration" title="Permanent link">&para;</a></h4>
+<p>In order for the system to work correctly, specific kernel models need to be loaded at boot time and parameters set as follows:</p>
+<div class="codehilite"><pre><span></span><code>cat <span class="s">&lt;&lt;EOF &gt;&gt;/mnt/boot/loader.conf</span>
+<span class="s">vfs.root.mountfrom=&quot;ufs:/dev/mirror/boot&quot;</span>
+<span class="s">kern.geom.label.disk_ident.enable=&quot;0&quot;</span>
+<span class="s">kern.geom.label.gptid.enable=&quot;0&quot;</span>
+<span class="s">geom_mirror_load=&quot;YES&quot;</span>
+<span class="s">geom_eli_load=&quot;YES&quot;</span>
+<span class="s">zfs_load=&quot;YES&quot;</span>
+<span class="s">EOF</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue ~<span class="o">]</span>$ cat <span class="s">&lt;&lt;EOF &gt;&gt;/mnt/boot/loader.conf</span>
+<span class="s">&gt; vfs.root.mountfrom=&quot;ufs:/dev/mirror/boot&quot;</span>
+<span class="s">&gt; kern.geom.label.disk_ident.enable=&quot;0&quot;</span>
+<span class="s">&gt; kern.geom.label.gptid.enable=&quot;0&quot;</span>
+<span class="s">&gt; geom_mirror_load=&quot;YES&quot;</span>
+<span class="s">&gt; geom_eli_load=&quot;YES&quot;</span>
+<span class="s">&gt; zfs_load=&quot;YES&quot;</span>
+<span class="s">&gt; EOF</span>
+</code></pre></div>
+
+<h4 id="basic-os-configuration">Basic OS Configuration<a class="headerlink" href="#basic-os-configuration" title="Permanent link">&para;</a></h4>
+<p>Ensure the system knows what to mount upon boot:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> /dev/mirror/boot / ufs rw <span class="m">1</span> <span class="m">1</span> &gt; /mnt/etc/fstab
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> /dev/mirror/swap.eli none swap sw <span class="m">0</span> <span class="m">0</span> &gt;&gt; /mnt/etc/fstab
+</code></pre></div>
+
+<p>Create a basic configuration for this pre-boot OS (the file does not exist at this stage):</p>
+<div class="codehilite"><pre><span></span><code>cat <span class="s">&lt;&lt;EOF &gt;&gt;/mnt/etc/rc.conf</span>
+<span class="s"># Pre-boot FreeBSD rc.conf</span>
+<span class="s"># basic system to allow booting into encrypted zfs</span>
+<span class="s">hostname=&quot;base-raw&quot;</span>
+<span class="s">ifconfig_re0=&quot;DHCP&quot; # MAKE SURE YOU USE THE RIGHT INTERFACE NAME HERE</span>
+<span class="s">sshd_enable=&quot;YES&quot;</span>
+<span class="s">sendmail_enable=&quot;NONE&quot;</span>
+<span class="s">cron_enable=&quot;NO&quot;</span>
+<span class="s">EOF</span>
+</code></pre></div>
+
+<h5 id="change-the-root-password">Change the root password<a class="headerlink" href="#change-the-root-password" title="Permanent link">&para;</a></h5>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ chroot /mnt passwd root
+Changing <span class="nb">local</span> password <span class="k">for</span> root
+New Password:
+Retype New Password:
+</code></pre></div>
+
+<h5 id="setup-timezone">Setup timezone<a class="headerlink" href="#setup-timezone" title="Permanent link">&para;</a></h5>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ chroot /mnt tzsetup
+</code></pre></div>
+
+<h4 id="sshd-configuration">SSHd configuration<a class="headerlink" href="#sshd-configuration" title="Permanent link">&para;</a></h4>
+<p>Configure the way to connect to your new FreeBSD server via SSH. Follow the results of your security risks analysis. The following setup is based on root having access but only via private key.</p>
+<p>Start by allowing remote root logins:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> <span class="s2">&quot;PermitRootLogin yes&quot;</span> &gt;&gt; /mnt/etc/ssh/sshd_config
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> <span class="s2">&quot;PasswordAuthentication no&quot;</span> &gt;&gt; /mnt/etc/ssh/sshd_config
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ <span class="nb">echo</span> <span class="s2">&quot;ChallengeResponseAuthentication no&quot;</span> &gt;&gt; /mnt/etc/ssh/sshd_config
+</code></pre></div>
+
+<p>and then generate the server\'s keys:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ chroot /mnt /etc/rc.d/sshd onekeygen
+</code></pre></div>
+
+<p>Copy your key in the authorized_keys file (to allow to connect by key)</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ mkdir -p /mnt/root/.ssh
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ chmod <span class="m">700</span> /mnt/root/.ssh
+<span class="o">[</span>root@rescue /<span class="o">]</span>$ vi /mnt/root/.ssh/authorized_keys
+</code></pre></div>
+
+<h4 id="reboot-and-continue-configuration">Reboot and continue configuration<a class="headerlink" href="#reboot-and-continue-configuration" title="Permanent link">&para;</a></h4>
+<p>The time has come to reboot the server and see if it boots correctly from the new partition. Installation will continue from the newly booted server. Remember to login using your SSH key if you followed the above configuration.</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@rescue /<span class="o">]</span>$ reboot
+</code></pre></div>
+
+<h4 id="update-freebsd">Update FreeBSD<a class="headerlink" href="#update-freebsd" title="Permanent link">&para;</a></h4>
+<p>Ensure you are running the latest version of FreeBSD</p>
+<div class="codehilite"><pre><span></span><code>$ freebsd-update fetch
+$ freebsd-update install
+</code></pre></div>
+
+<p>and reboot in order to load the new kernel!</p>
+<h3 id="install-the-stage-2-freebsd-system-encrypted">Install the stage-2 FreeBSD system (encrypted)<a class="headerlink" href="#install-the-stage-2-freebsd-system-encrypted" title="Permanent link">&para;</a></h3>
+<p>Boot into the freshly installed and updated FreeBSD base-raw system in order to continue with the installation of the main OS partition. Remember, encryption will take place using <code class="codehilite"><span class="err">geli</span></code> on the blk level and <strong>not</strong> under ZFS.</p>
+<h4 id="attach-encrypted-partitions">Attach encrypted partitions<a class="headerlink" href="#attach-encrypted-partitions" title="Permanent link">&para;</a></h4>
+<p>We need to attach the partitions which are encrypted before creating the <code class="codehilite"><span class="err">zpool</span></code>.</p>
+<div class="codehilite"><pre><span></span><code>root@base-raw:~ $ geli attach /dev/gpt/zroot0
+Enter passphrase:
+root@base-raw:~ $ geli attach /dev/gpt/zroot1
+Enter passphrase:
+</code></pre></div>
+
+<h4 id="create-the-zfs-pool">Create the zfs pool<a class="headerlink" href="#create-the-zfs-pool" title="Permanent link">&para;</a></h4>
+<div class="admonition note">
+<p class="admonition-title">Alignment to sector size</p>
+<p>It is recommended to set the <code class="codehilite"><span class="err">ashift</span></code> parameter based on your physical sector size to ensure correct alignment. For a sector size of 512 bytes (2<sup>9</sup>) you should set it to 9 (default). For a sector size of 4096 (4k, 2<sup>12</sup>) you should set it to 12. As usually hardware does not evolve in cloud servers, there is no point to set it to 12 just to be future proof as you would have done on you own hardware. You may also want to adjust any other relevant ZFS parameters.</p>
+</div>
+<div class="codehilite"><pre><span></span><code>root@base-raw:~ $ sysctl vfs.zfs.min_auto_ashift<span class="o">=</span><span class="m">9</span><span class="p">;</span>
+</code></pre></div>
+
+<p>The zfs pool will hold the main filesystems where FreeBSD will be installed. The setup opts for a simple list of mount points. You may want to choose differently (like the default FreeBSD install) depending on the usage of the server.</p>
+<div class="codehilite"><pre><span></span><code>root@base2-raw:~ $ zpool create -f -m none -o <span class="nv">altroot</span><span class="o">=</span>/mnt -o <span class="nv">cachefile</span><span class="o">=</span>/tmp/zpool.cache zpool mirror /dev/gpt/zroot0.eli /dev/gpt/zroot1.eli
+</code></pre></div>
+
+<p>Now create the filesystems we need:</p>
+<div class="codehilite"><pre><span></span><code>root@base2-raw:~ $ zfs create -o <span class="nv">mountpoint</span><span class="o">=</span>/ zpool/root
+</code></pre></div>
+
+<h4 id="install-the-freebsd-system_1">Install the FreeBSD system<a class="headerlink" href="#install-the-freebsd-system_1" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code>root@base2-raw:~ $ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/base.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+                                                      <span class="m">147</span> MB   <span class="m">10</span> MBps    14s
+root@base2-raw:~ $ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/lib32.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+-                                                       <span class="m">58</span> MB   <span class="m">10</span> MBps    06s
+root@base2-raw:~ $ fetch -o - http://ftp.freebsd.org/pub/FreeBSD/releases/amd64/12.1-RELEASE/kernel.txz <span class="p">|</span> tar --unlink -xpJf - -C /mnt
+-                                                       <span class="m">39</span> MB <span class="m">9269</span> kBps    05s
+</code></pre></div>
+
+<h4 id="configure-the-stage-2-system">Configure the stage-2 system<a class="headerlink" href="#configure-the-stage-2-system" title="Permanent link">&para;</a></h4>
+<h5 id="basic-settings">Basic settings<a class="headerlink" href="#basic-settings" title="Permanent link">&para;</a></h5>
+<div class="codehilite"><pre><span></span><code>root@base2-raw:~ $ cp /boot/loader.conf /mnt/boot/loader.conf
+root@base2-raw:~ $ cp /etc/rc.conf /mnt/etc/rc.conf
+root@base2-raw:~ $ cp /etc/resolv.conf /mnt/etc/resolv.conf
+root@base2-raw:~ $ cp /etc/ssh/ssh_host_* /mnt/etc/ssh/
+root@base2-raw:~ $ cp /etc/ssh/sshd_config /mnt/etc/ssh/
+root@base2-raw:~ $ mkdir -p /mnt/root/.ssh
+root@base2-raw:~ $ chmod <span class="m">700</span> /mnt/root/.ssh
+root@base2-raw:~ $ cp /root/.ssh/authorized_keys /mnt/root/.ssh/
+root@base2-raw:~ $ <span class="nb">echo</span> <span class="s1">&#39;daily_status_gmirror_enable=&quot;YES&quot;&#39;</span> &gt;&gt; /mnt/etc/periodic.conf
+root@base2-raw:~ $ mkdir -p /mnt/xboot
+root@base2-raw:~ $ chroot /mnt passwd root
+Changing <span class="nb">local</span> password <span class="k">for</span> root
+New Password:
+Retype New Password:
+root@base2-raw:~ $ chroot /mnt tzsetup
+</code></pre></div>
+
+<div class="admonition note">
+<p class="admonition-title">Security Warning</p>
+<p>Do not use the same password as for your stage-1 FreeBSD server. Remember that stage-1 boot relies on an unecrypted <code class="codehilite"><span class="err">ufs</span></code> filesystem. It is therefore possible that someone with access to the physical server may obtain the password file and reverse engineer your password.</p>
+</div>
+<p>You may now change the hostname in <code class="codehilite"><span class="err">/mnt/etc/rc.conf</span></code> to <code class="codehilite"><span class="err">base</span></code> instead of <code class="codehilite"><span class="err">base-raw</span></code> (or to whatever you like). This may help you understand the system you have ssh\'ed into.</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">#</span>
+<span class="c1"># FreeBSD Encrypted Stage-2 Server Configuration</span>
+<span class="c1">#</span>
+<span class="nv">hostname</span><span class="o">=</span><span class="s2">&quot;base&quot;</span>
+<span class="nv">ifconfig_re0</span><span class="o">=</span><span class="s2">&quot;DHCP&quot;</span>
+<span class="nv">zfs_enable</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#       Daemons</span>
+<span class="c1">#</span>
+<span class="nv">sshd_enable</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="nv">sendmail_enable</span><span class="o">=</span><span class="s2">&quot;NONE&quot;</span>
+<span class="nv">ntpdate_enable</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+</code></pre></div>
+
+<p>Edit the <code class="codehilite"><span class="err">fstab</span></code> file to mount the ufs boot partition to <code class="codehilite"><span class="err">xboot</span></code></p>
+<div class="codehilite"><pre><span></span><code>cat <span class="s">&lt;&lt;EOF &gt;&gt;/mnt/etc/fstab </span>
+<span class="s">/dev/mirror/boot /xboot ufs rw 1 1</span>
+<span class="s">/dev/mirror/swap.eli none swap sw 0 0</span>
+<span class="s">EOF</span>
+</code></pre></div>
+
+<h4 id="prepare-a-script-automatically-decrypt-and-boot-to-stage-2">Prepare a script automatically decrypt and boot to stage 2<a class="headerlink" href="#prepare-a-script-automatically-decrypt-and-boot-to-stage-2" title="Permanent link">&para;</a></h4>
+<p>Create a script under <code class="codehilite"><span class="err">/root/boot_stage2</span></code>:</p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/sh</span>
+<span class="nb">set</span> -x
+geli attach gpt/zroot0
+geli attach gpt/zroot1
+kenv vfs.root.mountfrom<span class="o">=</span><span class="s2">&quot;zfs:zpool/root&quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;Ready to boot? press enter or Ctr-C to stop&quot;</span>
+<span class="nb">read</span> a
+<span class="c1"># If you want to change your network configuration in the stage-2 system, you will need</span>
+<span class="c1"># to clean up your network settings here (flush routes, etc.)</span>
+reboot -r
+</code></pre></div>
+
+<p>Use as <code class="codehilite"><span class="err">sh /root/boot_stage2</span></code>.</p>
+<h4 id="boot-the-system-to-stage-2">Boot the system to Stage-2<a class="headerlink" href="#boot-the-system-to-stage-2" title="Permanent link">&para;</a></h4>
+<div class="codehilite"><pre><span></span><code>root@base-raw:/ $ zpool <span class="nb">export</span> zpool
+root@base-raw:/ $ kenv vfs.root.mountfrom<span class="o">=</span><span class="s2">&quot;zfs:zpool/root&quot;</span>
+root@base-raw:/ $ reboot -r
+</code></pre></div>
+
+<p>Your connection will now drop. You should now ssh back to your new system!</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>In case you fail to connect to the newly booted system and you have no access to the console to debug the issue, you will need to request a reboot of your server. A frequent cause is badly configured networking (you are actually flying blind at this stage). Upon reboot, you will be booting to the Stage-1 system that will allow you to attach your two encrypted devices, import the zpool and mount the filesystem to edit the stage-2 configuration files.</p>
+</div>
+<h4 id="upgrade-freebsd">Upgrade FreeBSD<a class="headerlink" href="#upgrade-freebsd" title="Permanent link">&para;</a></h4>
+<p>Update the new installation to the latest patch level. Don\'t forget, we are running under the updated kernel already!</p>
+<div class="codehilite"><pre><span></span><code>root@base:/ $ freebsd-update fetch
+root@base:/ $ freebsd-update install
+root@base:/ $ shutdown -r now
+</code></pre></div>
+
+<p>When the system comes up, log in to your Stage-1 system and run the script to boot into the Stage-2 system by supplying your password for each of the two encrypted partitions.</p>
+<h2 id="post-configuration-of-your-stage-2-freebsd-server">Post configuration of your Stage-2 FreeBSD server<a class="headerlink" href="#post-configuration-of-your-stage-2-freebsd-server" title="Permanent link">&para;</a></h2>
+<p>You can now do the final configuration steps for your secure FreeBSD server.</p>
+<h3 id="install-the-pkg-system-and-basic-packages">Install the pkg system and basic packages<a class="headerlink" href="#install-the-pkg-system-and-basic-packages" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code>root@base:~ $ pkg update
+The package management tool is not yet installed on your system.
+Do you want to fetch and install it now? <span class="o">[</span>y/N<span class="o">]</span>: y
+Bootstrapping pkg from pkg+http://pkg.FreeBSD.org/FreeBSD:12:amd64/quarterly, please wait...
+Verifying signature with trusted certificate pkg.freebsd.org.2013102301... <span class="k">done</span>
+Installing pkg-1.14.6...
+Extracting pkg-1.14.6: <span class="m">100</span>%
+Updating FreeBSD repository catalogue...
+Fetching meta.conf: <span class="m">100</span>%    <span class="m">163</span> B   <span class="m">0</span>.2kB/s    <span class="m">00</span>:01
+Fetching packagesite.txz: <span class="m">100</span>%    <span class="m">6</span> MiB   <span class="m">6</span>.6MB/s    <span class="m">00</span>:01
+Processing entries: <span class="m">100</span>%
+FreeBSD repository update completed. <span class="m">32006</span> packages processed.
+All repositories are up to date.
+
+root@base:~ $ pkg install -y bash ca_root_nss neoftech py37-speedtest-cli-2.1.2 
+</code></pre></div>
+
+<h2 id="maintenance-of-your-secure-server">Maintenance of your secure server<a class="headerlink" href="#maintenance-of-your-secure-server" title="Permanent link">&para;</a></h2>
+<p>While it may run un-interrupted for years, a FreeBSD server is a pet: it requires regular attention to ensure that the system is upgraded to the right patch level or the right version to ensure the best possible security. Keeping your system up to date means</p>
+<ol>
+<li>(carefully) updating your installed packages to their latest versions;</li>
+<li>updating FreeBSD to its latest patch level;</li>
+<li>updating FreeBSD to the next major and/or minor version.</li>
+</ol>
+<p>Applying patches to the secure FreeBSD means applying them both to the Stage-1 and Stage-2 system. Start by patching the Stage-2 system (<code class="codehilite"><span class="err">freebsd-update fetch; freebsed-update install</span></code>) , reboot to stage-1 and repeat the process. Reboot again to stage-1 and follow the steps to boot to stage-2. Your system is now updated. </p>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../" title="About FreeBSD Recipes" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                About FreeBSD Recipes
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../jails/" title="A Jail-based FreeBSD Application Server" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                A Jail-based FreeBSD Application Server
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.2d1db4bd.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6627ddf3.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.5eca75d3.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
+</html>

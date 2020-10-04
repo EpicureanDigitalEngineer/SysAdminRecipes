@@ -1,0 +1,791 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A collection of recipes (articles, guides, HowTos, instructables) around system administration and digital services">
+      
+      
+        <link rel="canonical" href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes/freebsd/ghost/">
+      
+      
+        <meta name="author" content="The Epicurean Digital Engineer (EpicureanDigitalEngineer@gmail.com)">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-5.5.13">
+    
+    
+      
+        <title>Installing the ghost blogging platform in FreeBSD - System Administration Recipes</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.077507d7.min.css">
+      
+      
+    
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#installing-the-ghost-blogging-platform-under-freebsd-12x" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes" title="System Administration Recipes" class="md-header-nav__button md-logo" aria-label="System Administration Recipes">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
+            System Administration Recipes
+          </span>
+          <span class="md-header-nav__topic md-ellipsis">
+            
+              Installing the ghost blogging platform in FreeBSD
+            
+          </span>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+        
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes" title="System Administration Recipes" class="md-nav__button md-logo" aria-label="System Administration Recipes">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    System Administration Recipes
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="SysAdmin Recipes" class="md-nav__link">
+      SysAdmin Recipes
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-2" type="checkbox" id="nav-2" checked>
+    
+    <label class="md-nav__link" for="nav-2">
+      FreeBSD Recipes
+      <span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="FreeBSD Recipes" data-md-level="1">
+      <label class="md-nav__title" for="nav-2">
+        <span class="md-nav__icon md-icon"></span>
+        FreeBSD Recipes
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../" title="About FreeBSD Recipes" class="md-nav__link">
+      About FreeBSD Recipes
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../secure-server/" title="A Secure FreeBSD Server in the cloud" class="md-nav__link">
+      A Secure FreeBSD Server in the cloud
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../jails/" title="A Jail-based FreeBSD Application Server" class="md-nav__link">
+      A Jail-based FreeBSD Application Server
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Installing the ghost blogging platform in FreeBSD
+        <span class="md-nav__icon md-icon"></span>
+      </label>
+    
+    <a href="./" title="Installing the ghost blogging platform in FreeBSD" class="md-nav__link md-nav__link--active">
+      Installing the ghost blogging platform in FreeBSD
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-the-required-stack" class="md-nav__link">
+    Install the required stack
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-mysql" class="md-nav__link">
+    Configure MySQL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-ghost" class="md-nav__link">
+    Install ghost
+  </a>
+  
+    <nav class="md-nav" aria-label="Install ghost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-system-user-for-ghost" class="md-nav__link">
+    Create a system user for ghost
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-ghost-cli" class="md-nav__link">
+    Install ghost-cli
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-start-up-script-for-freebsd" class="md-nav__link">
+    Create a start-up script for FreeBSD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-ghost" class="md-nav__link">
+    Configure ghost
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-ghost" class="md-nav__link">
+    Updating ghost
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../notyet/" title="A Windows Domain Controller using SAMBA on FreeBSD" class="md-nav__link">
+      A Windows Domain Controller using SAMBA on FreeBSD
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#problem-statement" class="md-nav__link">
+    Problem Statement
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#concepts" class="md-nav__link">
+    Concepts
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-the-required-stack" class="md-nav__link">
+    Install the required stack
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configure-mysql" class="md-nav__link">
+    Configure MySQL
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#install-ghost" class="md-nav__link">
+    Install ghost
+  </a>
+  
+    <nav class="md-nav" aria-label="Install ghost">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#create-a-system-user-for-ghost" class="md-nav__link">
+    Create a system user for ghost
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#install-ghost-cli" class="md-nav__link">
+    Install ghost-cli
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-a-start-up-script-for-freebsd" class="md-nav__link">
+    Create a start-up script for FreeBSD
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-ghost" class="md-nav__link">
+    Configure ghost
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#updating-ghost" class="md-nav__link">
+    Updating ghost
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git/edit/master/docs/freebsd/ghost.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  
+                
+                
+                <h1 id="installing-the-ghost-blogging-platform-under-freebsd-12x">Installing the <code class="codehilite"><span class="err">ghost</span></code> blogging platform under FreeBSD 12.x<a class="headerlink" href="#installing-the-ghost-blogging-platform-under-freebsd-12x" title="Permanent link">&para;</a></h1>
+<h2 id="problem-statement">Problem Statement<a class="headerlink" href="#problem-statement" title="Permanent link">&para;</a></h2>
+<p>This recipe provides instructions to install and maintain the <a href="https://ghost.org/"><code class="codehilite"><span class="err">ghost</span></code></a> blogging platform under FreeBSD which is not available as a separate package. There are no detailed installation instructions on the ghost site, but the app runs well and true under FreeBSD.</p>
+<h2 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h2>
+<p><code class="codehilite"><span class="err">ghost</span></code> runs on the following stack: <code class="codehilite"><span class="err">NodeJS</span></code>, <code class="codehilite"><span class="err">MySQL</span></code> (<code class="codehilite"><span class="err">NGINX</span></code>|<code class="codehilite"><span class="err">HAProxy</span></code>|<code class="codehilite"><span class="err">Apache</span></code>), <code class="codehilite"><span class="err">mail</span></code>.  The required modules can be found <a href="https://ghost.org/docs/install/ubuntu/">here</a>. This recipe should be ideally be executed in a FreeBSD jail to allow isolation of the services but may also be installed on a standard system. For this recipe we consider the current machine has the address <code class="codehilite"><span class="err">blog.example.com</span></code> and no prior installation of any of the required stack services. A mail client should be available and operating on the system (e.g. <code class="codehilite"><span class="err">ssmtp</span></code>) to allow <code class="codehilite"><span class="err">ghost</span></code> to communicate with the outside world. We don't treat here how to expose the service to the internet securely (e.g. behind a reverse proxy like <code class="codehilite"><span class="err">HAProxy</span></code> or <code class="codehilite"><span class="err">Nginx</span></code>).</p>
+<h2 id="install-the-required-stack">Install the required stack<a class="headerlink" href="#install-the-required-stack" title="Permanent link">&para;</a></h2>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@ghost /<span class="o">]</span>$ pkg install node10 npm-node10 mysql57-server
+</code></pre></div>
+
+<p>Check that packages are correctly installed:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@ghost /<span class="o">]</span>$ node --version
+v10.16.3
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ npm --version
+<span class="m">6</span>.11.3
+</code></pre></div>
+
+<h2 id="configure-mysql">Configure MySQL<a class="headerlink" href="#configure-mysql" title="Permanent link">&para;</a></h2>
+<p>Prepare a secure installation of MySQL:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@ghost /<span class="o">]</span>$ sysrc <span class="nv">mysql_enable</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+mysql_enable:  -&gt; YES
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ service mysql-server start
+Starting mysql.
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ mysql_secure_installation
+...
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ mysql -u root -p
+
+root@localhost <span class="o">[(</span>none<span class="o">)]</span>&gt; ALTER USER <span class="s1">&#39;root&#39;</span>@<span class="s1">&#39;localhost&#39;</span> IDENTIFIED WITH mysql_native_password BY <span class="s1">&#39;ENTERNEWPASSHERE&#39;</span><span class="p">;</span>
+root@localhost <span class="o">[(</span>none<span class="o">)]</span>&gt; exit<span class="p">;</span>
+</code></pre></div>
+
+<h2 id="install-ghost">Install ghost<a class="headerlink" href="#install-ghost" title="Permanent link">&para;</a></h2>
+<h3 id="create-a-system-user-for-ghost">Create a system user for ghost<a class="headerlink" href="#create-a-system-user-for-ghost" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@ghost /<span class="o">]</span>$ adduser ghost
+Username: ghost
+Full name: Ghost User
+Uid <span class="o">(</span>Leave empty <span class="k">for</span> default<span class="o">)</span>:
+Login group <span class="o">[</span>ghost<span class="o">]</span>:
+Login group is ghost. Invite ghost into other groups? <span class="o">[]</span>: www
+Login class <span class="o">[</span>default<span class="o">]</span>:
+Shell <span class="o">(</span>sh csh tcsh bash rbash nologin<span class="o">)</span> <span class="o">[</span>sh<span class="o">]</span>:
+Home directory <span class="o">[</span>/home/ghost<span class="o">]</span>:
+Home directory permissions <span class="o">(</span>Leave empty <span class="k">for</span> default<span class="o">)</span>:
+Use password-based authentication? <span class="o">[</span>yes<span class="o">]</span>:
+Use an empty password? <span class="o">(</span>yes/no<span class="o">)</span> <span class="o">[</span>no<span class="o">]</span>:
+Use a random password? <span class="o">(</span>yes/no<span class="o">)</span> <span class="o">[</span>no<span class="o">]</span>: yes
+Lock out the account after creation? <span class="o">[</span>no<span class="o">]</span>:
+Username   : ghost
+Password   : &lt;random&gt;
+Full Name  : Ghost User
+Uid        : <span class="m">1001</span>
+Class      :
+Groups     : ghost www
+Home       : /home/ghost
+Home Mode  :
+Shell      : /bin/sh
+Locked     : no
+OK? <span class="o">(</span>yes/no<span class="o">)</span>: yes
+adduser: INFO: Successfully added <span class="o">(</span>ghost<span class="o">)</span> to the user database.
+adduser: INFO: Password <span class="k">for</span> <span class="o">(</span>ghost<span class="o">)</span> is: xyz
+</code></pre></div>
+
+<h3 id="install-ghost-cli">Install ghost-cli<a class="headerlink" href="#install-ghost-cli" title="Permanent link">&para;</a></h3>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span>root@ghost /<span class="o">]</span>$ npm i -g ghost-cli
+...
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ mkdir -p /usr/local/www/ghost
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ chown ghost:ghost /usr/local/www/ghost
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ chmod <span class="m">775</span> /usr/local/www/ghost
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ <span class="nb">cd</span> /usr/local/www/ghost
+<span class="o">[</span>root@ghost /usr/local/www/ghost<span class="o">]</span>$ su ghost -c bash
+<span class="o">[</span>ghost@ghost /usr/local/www/ghost<span class="o">]</span>$ ghost install
+✔ Checking system Node.js version
+✔ Checking current folder permissions
+System checks failed with message: <span class="s1">&#39;Operating system is not Linux&#39;</span>
+Some features of Ghost-CLI may not work without additional configuration.
+For <span class="nb">local</span> installs we recommend using <span class="sb">`</span>ghost install <span class="nb">local</span><span class="sb">`</span> instead.
+? Continue anyway? Yes
+System stack check skipped
+ℹ Checking operating system compatibility <span class="o">[</span>skipped<span class="o">]</span>
+Local MySQL install not found. You can ignore this <span class="k">if</span> you are using a remote MySQL host.
+Alternatively you could:
+a<span class="o">)</span> install MySQL locally
+b<span class="o">)</span> run <span class="sb">`</span>ghost install --db<span class="o">=</span>sqlite3<span class="sb">`</span> to use sqlite
+c<span class="o">)</span> run <span class="sb">`</span>ghost install <span class="nb">local</span><span class="sb">`</span> to get a development install using sqlite3.
+? Continue anyway? Yes
+MySQL check skipped
+ℹ Checking <span class="k">for</span> a MySQL installation <span class="o">[</span>skipped<span class="o">]</span>
+✔ Checking memory availability
+✔ Checking <span class="k">for</span> latest Ghost version
+✔ Setting up install directory
+✔ Downloading and installing Ghost v3.2.0
+✔ Finishing install process
+? Enter your blog URL: https://kd.blogs.dryllerakis.eu/
+? Enter your MySQL hostname: localhost
+? Enter your MySQL username: root
+? Enter your MySQL password: <span class="o">[</span>hidden<span class="o">]</span>
+? Enter your Ghost database name: ghost_prod
+✔ Configuring Ghost
+✔ Setting up instance
+? Do you wish to <span class="nb">set</span> up <span class="s2">&quot;ghost&quot;</span> mysql user? Yes
+✖ Setting up <span class="s2">&quot;ghost&quot;</span> mysql user
+Nginx is not installed. Skipping Nginx setup.
+ℹ Setting up Nginx <span class="o">[</span>skipped<span class="o">]</span>
+Nginx setup task was skipped, skipping SSL setup
+ℹ Setting up SSL <span class="o">[</span>skipped<span class="o">]</span>
+? Do you wish to <span class="nb">set</span> up Systemd? No
+ℹ Setting up Systemd <span class="o">[</span>skipped<span class="o">]</span>
+Process manager <span class="s1">&#39;systemd&#39;</span> will not run on this system, defaulting to <span class="s1">&#39;local&#39;</span>
+? Do you want to start Ghost? Yes
+✔ Starting Ghost
+
+Ghost uses direct mail by default. To <span class="nb">set</span> up an alternative email method <span class="nb">read</span> our docs at https://ghost.org/docs/concepts/config/#mail
+
+------------------------------------------------------------------------------
+
+Ghost was installed successfully! To <span class="nb">complete</span> setup of your publication, visit:
+
+    https://blog.example.com/ghost/
+</code></pre></div>
+
+<h3 id="create-a-start-up-script-for-freebsd">Create a start-up script for FreeBSD<a class="headerlink" href="#create-a-start-up-script-for-freebsd" title="Permanent link">&para;</a></h3>
+<p>Script: <code class="codehilite"><span class="err">/usr/local/etc/rc.d/ghost</span></code></p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/bin/sh</span>
+
+<span class="c1"># PROVIDE: ghost</span>
+<span class="c1"># REQUIRE: mysql-server</span>
+<span class="c1"># KEYWORD: shutdown</span>
+
+<span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin&quot;</span>
+
+. /etc/rc.subr
+
+<span class="nv">name</span><span class="o">=</span><span class="s2">&quot;ghost&quot;</span>
+<span class="nv">rcvar</span><span class="o">=</span><span class="s2">&quot;ghost_enable&quot;</span>
+
+load_rc_config ghost
+: <span class="si">${</span><span class="nv">ghost_enable</span><span class="p">:=</span><span class="s2">&quot;NO&quot;</span><span class="si">}</span>
+: <span class="si">${</span><span class="nv">ghost_msg</span><span class="p">=</span><span class="s2">&quot;Ghost did not start&quot;</span><span class="si">}</span>
+
+<span class="nv">start_cmd</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span><span class="s2">_start&quot;</span>
+<span class="nv">stop_cmd</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span><span class="s2">_stop&quot;</span>
+<span class="nv">stop_postcmd</span><span class="o">=</span><span class="s2">&quot;echo Ghost stopped&quot;</span>
+<span class="nv">restart_cmd</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span><span class="s2">_restart&quot;</span>
+<span class="nv">required_dirs</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$ghost_path</span><span class="s2">&quot;</span>
+
+ghost_start<span class="o">()</span> <span class="o">{</span>
+    su -m ghost -c <span class="s2">&quot;cd </span><span class="nv">$ghost_path</span><span class="s2"> &amp;&amp; ghost start&quot;</span>
+<span class="o">}</span>
+
+ghost_stop<span class="o">()</span> <span class="o">{</span>
+    su -m ghost -c <span class="s2">&quot;cd </span><span class="nv">$ghost_path</span><span class="s2"> &amp;&amp; ghost stop&quot;</span>
+<span class="o">}</span>
+
+ghost_restart<span class="o">()</span> <span class="o">{</span>
+    su -m ghost -c <span class="s2">&quot;cd </span><span class="nv">$ghost_path</span><span class="s2"> &amp;&amp; ghost restart&quot;</span>
+<span class="o">}</span>
+
+
+run_rc_command <span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
+​<span class="sb">```</span> bash
+
+and add it to the <span class="sb">`</span>rc.conf<span class="sb">`</span>:
+​<span class="sb">```</span> bash
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ sysrc <span class="nv">ghost_enable</span><span class="o">=</span><span class="s2">&quot;YES&quot;</span>
+<span class="o">[</span>root@ghost /<span class="o">]</span>$ sysrc <span class="nv">ghost_path</span><span class="o">=</span><span class="s2">&quot;/usr/local/www/ghost&quot;</span>
+</code></pre></div>
+
+<p>Finally, update the config file to use <code class="codehilite"><span class="err">ssmtp</span></code> or <code class="codehilite"><span class="err">sendmail</span></code> for mailing:</p>
+<div class="codehilite"><pre><span></span><code>$ sed -ie <span class="s1">&#39;s/Direct/sendmail/g&#39;</span> config.production.json
+</code></pre></div>
+
+<h3 id="configure-ghost">Configure ghost<a class="headerlink" href="#configure-ghost" title="Permanent link">&para;</a></h3>
+<ul>
+<li>Update configuration to use <code class="codehilite"><span class="err">sendmail</span></code> (<code class="codehilite"><span class="err">ssmtp</span></code>)</li>
+<li>configure reverse proxy (<code class="codehilite"><span class="err">HAProxy</span></code>) to expose blog to the internet</li>
+</ul>
+<h2 id="updating-ghost">Updating ghost<a class="headerlink" href="#updating-ghost" title="Permanent link">&para;</a></h2>
+<ul>
+<li>ssh to the jail or OS</li>
+<li>navigate to <code class="codehilite"><span class="err">/usr/local/www/ghost</span></code></li>
+<li>run <code class="codehilite"><span class="err">su ghost</span></code></li>
+<li>run <code class="codehilite"><span class="err">ghost update</span></code></li>
+<li>voilà</li>
+<li>see <a href="https://ghost.org/update/?v=2.0">here</a> for more info</li>
+</ul>
+<h2 id="references">References<a class="headerlink" href="#references" title="Permanent link">&para;</a></h2>
+<ul>
+<li>[[https://idontwatch.tv/installing-ghost-on-freebsd-11-1/]]</li>
+<li>[[https://linoxide.com/linux-how-to/install-ghost-nginx-freebsd-10-2/]]</li>
+</ul>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../jails/" title="A Jail-based FreeBSD Application Server" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                A Jail-based FreeBSD Application Server
+              </div>
+            </div>
+          </a>
+        
+        
+          <a href="../../notyet/" title="A Windows Domain Controller using SAMBA on FreeBSD" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                A Windows Domain Controller using SAMBA on FreeBSD
+              </div>
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+          Material for MkDocs
+        </a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.2d1db4bd.min.js"></script>
+      <script src="../../assets/javascripts/bundle.6627ddf3.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+      
+      <script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.5eca75d3.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+      
+    
+  </body>
+</html>
