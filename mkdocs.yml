@@ -1,0 +1,41 @@
+site_name: System Administration Recipes
+site_url: https://github.com/EpicureanDigitalEngineer/SysAdminRecipes
+repo_url: https://github.com/EpicureanDigitalEngineer/SysAdminRecipes.git
+site_description: A collection of recipes (articles, guides, HowTos, instructables) around system administration and digital services
+site_author: The Epicurean Digital Engineer (EpicureanDigitalEngineer@gmail.com)
+theme: 
+  name: material
+
+markdown_extensions:
+  - attr_list
+  - admonition
+  - def_list
+  - toc:
+      permalink: true
+  - pymdownx.highlight:
+      guess_lang: true
+      extend_pygments_lang:
+        - name: php
+          lang: php
+          options:
+            - startinline: true
+  - pymdownx.superfences:
+      css_class: codehilite
+  - pymdownx.inlinehilite:
+      css_class: codehilite
+  - pymdownx.tilde
+  - pymdownx.betterem
+  - pymdownx.mark
+
+plugins:
+  - search:
+      lang: en
+
+nav:
+  - SysAdmin Recipes: index.md
+  - FreeBSD Recipes: 
+    - About FreeBSD Recipes: freebsd/index.md
+    - A Secure FreeBSD Server in the cloud: freebsd/secure-server.md
+    - A Jail-based FreeBSD Application Server: freebsd/jails.md
+    - Installing the ghost blogging platform in FreeBSD: freebsd/ghost.md
+    - A Windows Domain Controller using SAMBA on FreeBSD: notyet.md
